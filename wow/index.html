@@ -73,27 +73,56 @@
     <ul id="taskList"></ul>
   </div>
 
-  <script>
-    const taskInput = document.getElementById('taskInput');
-    const taskList = document.getElementById('taskList');
+<script>
+  const taskInput = document.getElementById('taskInput');
+  const taskList = document.getElementById('taskList');
 
-    taskInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        const taskText = taskInput.value.trim();
-        if (taskText !== "") {
-          const li = document.createElement('li');
-          li.textContent = taskText;
-
-          const deleteBtn = document.createElement('button');
-          deleteBtn.textContent = 'ลบ';
-          deleteBtn.onclick = () => taskList.removeChild(li);
-
-          li.appendChild(deleteBtn);
-          taskList.appendChild(li);
-          taskInput.value = '';
-        }
-      }
+  // โหลดรายการจาก localStorage ตอนเปิดเว็บ
+  window.onload = () => {
+    const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    savedTasks.forEach(taskText => {
+      addTask(taskText);
     });
-  </script>
+  };
+
+  // เพิ่มงานใหม่เมื่อกด Enter
+  taskInput.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+      const taskText = taskInput.value.trim();
+      if (taskText !== "") {
+        addTask(taskText);
+        saveTasks(); // บันทึกใหม่
+        taskInput.value = '';
+      }
+    }
+  });
+
+  // ฟังก์ชันเพิ่มรายการลงในหน้าเว็บ
+  function addTask(text) {
+    const li = document.createElement('li');
+    li.textContent = text;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'ลบ';
+    deleteBtn.onclick = () => {
+      taskList.removeChild(li);
+      saveTasks(); // บันทึกใหม่หลังลบ
+    };
+
+    li.appendChild(deleteBtn);
+    taskList.appendChild(li);
+  }
+
+  // ฟังก์ชันบันทึกรายการทั้งหมดลง localStorage
+  function saveTasks() {
+    const tasks = [];
+    document.querySelectorAll('#taskList li').forEach(li => {
+      const text = li.childNodes[0].textContent; // ข้อความงาน (ไม่รวมปุ่มลบ)
+      tasks.push(text);
+    });
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
+</script>
+
 </body>
 </html>
